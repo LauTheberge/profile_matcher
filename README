@@ -1,0 +1,3 @@
+This uses Postgres 16 as a database, with FastApi and Uvicorn as the server.
+This is a simple project that uses the Ruff formatter and linter.
+Run poetry install to install the dependencies from the .venv file

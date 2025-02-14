@@ -19,4 +19,11 @@ port = 5432
 
 create a database in the server with the name `TestDatabase`
 
+Plugins: 
+- Ruff
+- .env file support
+
+Run: fastapi dev main.py
+
+
 

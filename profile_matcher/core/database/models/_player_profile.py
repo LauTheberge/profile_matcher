@@ -40,8 +40,10 @@ class PlayerProfile(SQLModel, table=True):
 		description='Player ID', primary_key=True
 	)  # This should be a uuid, but for the test purpose, it is set as a string
 	credential: str = Field(description='Player credential')
-	created: datetime = Field(default=datetime.now(tz=timezone.utc))
-	modified: datetime = Field(default=datetime.now(tz=timezone.utc))
+	# Usually would have a default value of datetime.now(timezone.utc), but for the test purpose, it is set as None
+	created: datetime
+	# Usually would have a default value of datetime.now(timezone.utc), but for the test purpose, it is set as None
+	modified: datetime
 	last_session: Optional[datetime] = Field(
 		default=None, description='Last session when player logged in'
 	)
@@ -81,10 +83,7 @@ class PlayerProfile(SQLModel, table=True):
 		default=None, description='Custom field for player profile'
 	)
 
-	class Config:
-		arbitrary_types_allowed = True
-
 
 # This is for the test purpose (in order to seed the database with the test data)
 # In a normal scenario, this data would be coming from the client application and the table would be created from
-# a migration script
+# a migration script using Alembic.

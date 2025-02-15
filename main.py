@@ -27,6 +27,7 @@ async def get_db_session():
 
 # For purpose of this test, create a lifespan event that will
 # create the database and tables when the app starts and clear the metadata when the app stops.
+# In a normal scenario, table would be created from a migration script using Alembic.
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	async with session_manager.session() as db_session:

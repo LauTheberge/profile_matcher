@@ -1,9 +1,8 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional, List
 
-from pydantic import BaseModel, ConfigDict, Field as PydanticField
 from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from sqlmodel import SQLModel, Field
 
@@ -15,33 +14,8 @@ class Clan(SQLModel, table=True):
 
 
 # Models for player profile
-
-# Usually, Inventory would be a separate table containing with all the possible items and the number of each item
-# that the player has. For the test purpose, it is kept as a JSONB field in the PlayerProfile table
-# a one-to-one relations
-class Inventory(SQLModel, table=True):
-	id: int = Field(default=None, description='Inventory ID linked to a player', primary_key=True)
-	cash: float = Field(
-		default=0.0, description='Total amount of cash in player inventory'
-	)
-	coins: int = Field(
-		default=0, description='Total amount of coins in player inventory'
-	)
-	item_1: Optional[int] = Field(description='Number of item 1 in player inventory')
-	item_4: Optional[int] = Field(description='Number of item 4 in player inventory')
-	item_34: Optional[int] = Field(description='Number of item 34 in player inventory')
-	item_55: Optional[int] = Field(description='Number of item 55 in player inventory')
-	item_100: Optional[int] = Field(description='Number of item 100 in player inventory')
-
-
-class Device(SQLModel, table=False):
-	id: int = Field(description='Device ID')
-	model: str = Field(description='Device model')
-	carrier: str = Field(description='Carrier name')
-	firmware: str = Field(description='Device firmware version')
-
-
 class PlayerProfile(SQLModel, table=True):
+	__tablename__ = 'player-profile'
 	player_id: str = Field(
 		description='Player ID', primary_key=True
 	)  # This should be a uuid, but for the test purpose, it is set as a string
@@ -66,15 +40,9 @@ class PlayerProfile(SQLModel, table=True):
 		default=None, description='Last purchase made by player'
 	)
 	active_campaigns: Optional[List[str]] = Field(
-		sa_column=Column(
-			ARRAY(String)),
-			default=None,
-			description='List of active campaigns for player',
-		)
-	devices: List[Device] = Field(
-		sa_column=Column(JSONB),
-		default_factory=list,
-		description='List of devices used by player',
+		sa_column=Column(ARRAY(String)),
+		default=None,
+		description='List of active campaigns for player',
 	)
 	level: int = Field(default=1, description='Player level')
 	xp: int = Field(default=0, description='Player experience points for current level')
@@ -83,13 +51,45 @@ class PlayerProfile(SQLModel, table=True):
 	language: str = Field(description='App language used by player')
 	birthdate: datetime = Field(description='Player birthdate')
 	gender: Optional[str] = Field(default=None, description='Player gender')
-	inventory_id: int = Field(description='Player inventory id', foreign_key='inventory.id')
 	clan_id: int = Field(description='Player clan id', foreign_key='clan.id')
 	custom_field: Optional[str] = Field(
 		default=None, description='Custom field for player profile'
 	)
 
 
-# This is for the test purpose (in order to seed the database with the test data)
-# In a normal scenario, this data would be coming from the client application and the table would be created from
-# a migration script using Alembic.
+# Usually, Inventory would be a separate table containing with all the possible items and the number of each item
+# that the player has. For the test purpose, it is kept as a JSONB field in the PlayerProfile table
+# a one-to-one relations
+class Inventory(SQLModel, table=True):
+	id: int = Field(
+		default=None, description='Inventory ID linked to a player', primary_key=True
+	)
+	player_id: str = Field(
+		default=None,
+		description='Player ID linked to the inventory',
+		foreign_key='player-profile.player_id',
+	)
+	cash: float = Field(
+		default=0.0, description='Total amount of cash in player inventory'
+	)
+	coins: int = Field(
+		default=0, description='Total amount of coins in player inventory'
+	)
+	item_1: Optional[int] = Field(description='Number of item 1 in player inventory')
+	item_4: Optional[int] = Field(description='Number of item 4 in player inventory')
+	item_34: Optional[int] = Field(description='Number of item 34 in player inventory')
+	item_55: Optional[int] = Field(description='Number of item 55 in player inventory')
+	item_100: Optional[int] = Field(
+		description='Number of item 100 in player inventory'
+	)
+
+
+class Device(SQLModel, table=True):
+	id: int = Field(description='Device ID', primary_key=True)
+	player_id: str = Field(
+		description='Player ID linked to the device',
+		foreign_key='player-profile.player_id',
+	)
+	model: str = Field(description='Device model')
+	carrier: str = Field(description='Carrier name')
+	firmware: str = Field(description='Device firmware version')

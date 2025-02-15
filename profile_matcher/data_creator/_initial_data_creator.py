@@ -6,6 +6,9 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from profile_matcher.core.database.models import Device, Inventory, PlayerProfile, Clan
 
+# This is for the test purpose (in order to seed the database with the test data)
+# In a normal scenario, this data would be coming from the client application.
+
 
 class InitialDataCreator:
 	def __init__(self):
@@ -21,19 +24,6 @@ class InitialDataCreator:
 			name='Hello world clan',
 		)
 
-		test_inventory = Inventory(
-			id=1,
-			cash=123,
-			coins=123,
-			item_1=1,
-			item_34=3,
-			item_55=2,
-		)
-
-		device = Device(
-			id=1, model='apple iphone 11', carrier='vodafone', firmware='123'
-		)
-
 		player_profile = PlayerProfile(
 			player_id='97983be2-98b7-11e7-90cf-082e5f28d836',
 			credential='apple_credential',
@@ -45,7 +35,6 @@ class InitialDataCreator:
 			total_transactions=5,
 			last_purchase=datetime(2021, 1, 22, 13, 37, 17),
 			active_campaigns=[],
-			devices=[device.model_dump()],
 			level=3,
 			xp=1000,
 			total_playtime=144,
@@ -53,15 +42,38 @@ class InitialDataCreator:
 			language='fr',
 			birthdate=datetime(2000, 1, 10, 13, 37, 17),
 			gender='male',
-			inventory_id=test_inventory.id,
 			clan_id=test_clan.id,
 			custom_field='mycustom',
 		)
+
+		test_inventory = Inventory(
+			id=1,
+			player_id='97983be2-98b7-11e7-90cf-082e5f28d836',
+			cash=123,
+			coins=123,
+			item_1=1,
+			item_34=3,
+			item_55=2,
+		)
+
+		test_device = Device(
+			id=1,
+			player_id='97983be2-98b7-11e7-90cf-082e5f28d836',
+			model='apple iphone 11',
+			carrier='vodafone',
+			firmware='123',
+		)
 		session.add(test_clan)
-		session.add(test_inventory)
 		session.add(player_profile)
-		await session.commit()
+		# Sync the temporary state with the permanent state before refreshing to make data available for test_inventory
+		# and test_device
+		await session.flush()
 		await session.refresh(player_profile)
+
+		session.add(test_inventory)
+		session.add(test_device)
+
+		await session.commit()
 
 	async def try_create_data(self, session: AsyncSession):
 		"""

@@ -20,10 +20,19 @@ class InitialDataCreator:
 			id=123456,
 			name='Hello world clan',
 		)
+
+		test_inventory = Inventory(
+			id=1,
+			cash=123,
+			coins=123,
+			item_1=1,
+			item_34=3,
+			item_55=2,
+		)
+
 		device = Device(
 			id=1, model='apple iphone 11', carrier='vodafone', firmware='123'
 		)
-		inventory = Inventory(cash=123, coins=123, item_1=1, item_34=3, item_55=2)
 
 		player_profile = PlayerProfile(
 			player_id='97983be2-98b7-11e7-90cf-082e5f28d836',
@@ -44,7 +53,7 @@ class InitialDataCreator:
 			language='fr',
 			birthdate=datetime(2000, 1, 10, 13, 37, 17),
 			gender='male',
-			inventory=inventory.model_dump(),
+			inventory_id=test_inventory.id,
 			clan_id=test_clan.id,
 			custom_field='mycustom',
 		)

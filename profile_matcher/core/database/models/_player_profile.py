@@ -15,17 +15,23 @@ class Clan(SQLModel, table=True):
 
 
 # Models for player profile
-class Inventory(BaseModel):
-	# This model minimally defines the fields that are required for the Inventory mode (cash and coins), but allows for
-	# any additional fields to be added
-	__pydantic_extra__: dict[str, int] = PydanticField(init=False)
+
+# Usually, Inventory would be a separate table containing with all the possible items and the number of each item
+# that the player has. For the test purpose, it is kept as a JSONB field in the PlayerProfile table
+# a one-to-one relations
+class Inventory(SQLModel, table=True):
+	id: int = Field(default=None, description='Inventory ID linked to a player', primary_key=True)
 	cash: float = Field(
 		default=0.0, description='Total amount of cash in player inventory'
 	)
 	coins: int = Field(
 		default=0, description='Total amount of coins in player inventory'
 	)
-	model_config = ConfigDict(extra='allow')
+	item_1: Optional[int] = Field(description='Number of item 1 in player inventory')
+	item_4: Optional[int] = Field(description='Number of item 4 in player inventory')
+	item_34: Optional[int] = Field(description='Number of item 34 in player inventory')
+	item_55: Optional[int] = Field(description='Number of item 55 in player inventory')
+	item_100: Optional[int] = Field(description='Number of item 100 in player inventory')
 
 
 class Device(SQLModel, table=False):
@@ -77,7 +83,7 @@ class PlayerProfile(SQLModel, table=True):
 	language: str = Field(description='App language used by player')
 	birthdate: datetime = Field(description='Player birthdate')
 	gender: Optional[str] = Field(default=None, description='Player gender')
-	inventory: Inventory = Field(sa_column=Column(JSONB), description='Player inventory')
+	inventory_id: int = Field(description='Player inventory id', foreign_key='inventory.id')
 	clan_id: int = Field(description='Player clan id', foreign_key='clan.id')
 	custom_field: Optional[str] = Field(
 		default=None, description='Custom field for player profile'

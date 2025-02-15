@@ -59,7 +59,7 @@ class PlayerProfile(SQLModel, table=True):
 		default=None, description='Custom field for player profile'
 	)
 	inventory: "Inventory" = Relationship(back_populates="player", sa_relationship_kwargs={'lazy': 'selectin'})
-	device: "Device" = Relationship(back_populates="player", sa_relationship_kwargs={'lazy': 'selectin'})
+	devices: list["Device"] = Relationship(back_populates="player", sa_relationship_kwargs={'lazy': 'selectin'})
 	clan: "Clan" = Relationship(back_populates="players", sa_relationship_kwargs={'lazy': 'selectin'})
 
 
@@ -102,5 +102,5 @@ class Device(SQLModel, table=True):
 	carrier: str = Field(description='Carrier name')
 	firmware: str = Field(description='Device firmware version')
 
-	player: PlayerProfile = Relationship(back_populates="device", sa_relationship_kwargs={'lazy': 'selectin'})
+	player: PlayerProfile = Relationship(back_populates="devices", sa_relationship_kwargs={'lazy': 'selectin'})
 

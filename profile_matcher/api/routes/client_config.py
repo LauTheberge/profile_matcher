@@ -2,15 +2,16 @@ from fastapi import APIRouter, Depends
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from profile_matcher.api.models.player_profile_response import Inventory, Device
+from profile_matcher.api.models.player_profile_response import PlayerProfileResponse
 from profile_matcher.database import get_db_session
-from profile_matcher.database.models import PlayerProfile, Clan
+from profile_matcher.database.models import PlayerProfile
 
 router = APIRouter()
 
 
 @router.get(
-    '/user/{player_id}'
+    '/user/{player_id}',
+    response_model=PlayerProfileResponse
 )
 async def get_user(player_id: str, session: AsyncSession = Depends(get_db_session)):
     """

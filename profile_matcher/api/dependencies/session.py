@@ -1,6 +1,6 @@
 from dotenv import dotenv_values
 
-from session import AsyncSessionManager
+from profile_matcher.session import AsyncSessionManager
 
 config = dotenv_values('.env')
 postgres_url = config['DATABASE_URL']

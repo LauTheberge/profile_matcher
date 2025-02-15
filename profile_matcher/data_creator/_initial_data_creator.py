@@ -58,6 +58,7 @@ class InitialDataCreator:
 			custom_field='mycustom',
 		)
 		session.add(test_clan)
+		session.add(test_inventory)
 		session.add(player_profile)
 		await session.commit()
 		await session.refresh(player_profile)

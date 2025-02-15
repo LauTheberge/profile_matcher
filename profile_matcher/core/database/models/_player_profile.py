@@ -35,7 +35,7 @@ class Inventory(SQLModel, table=True):
 
 
 class Device(SQLModel, table=False):
-	id: int = Field(description='Device ID', primary_key=True)
+	id: int = Field(description='Device ID')
 	model: str = Field(description='Device model')
 	carrier: str = Field(description='Carrier name')
 	firmware: str = Field(description='Device firmware version')

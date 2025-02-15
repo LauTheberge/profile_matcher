@@ -6,8 +6,8 @@ import uvicorn
 from dotenv import dotenv_values
 from fastapi import FastAPI
 
-from data_creator import InitialDataCreator
-from session import AsyncSessionManager
+from profile_matcher.data_creator import InitialDataCreator
+from profile_matcher.session import AsyncSessionManager
 
 # Load the environment variables from the .env file
 config = dotenv_values('.env')

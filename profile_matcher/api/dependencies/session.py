@@ -1,13 +1,9 @@
-from dotenv import dotenv_values
+from typing import Annotated
 
-from profile_matcher.session import AsyncSessionManager
 
-config = dotenv_values('.env')
-postgres_url = config['DATABASE_URL']
+from fastapi import Depends
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-# Create the session manager
-session_manager = AsyncSessionManager(postgres_url)
+from profile_matcher.database import get_db_session
 
-async def get_db_session():
-	async with session_manager.session() as session:
-		yield session
+

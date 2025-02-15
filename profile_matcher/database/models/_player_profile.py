@@ -3,14 +3,17 @@ from typing import Optional, List
 
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import relationship
 
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 
 
 # Models for clan
 class Clan(SQLModel, table=True):
 	id: int = Field(default=None, description='Clan ID', primary_key=True)
 	name: str = Field(default=None, description='Clan name')
+
+	players: List["PlayerProfile"] = Relationship(back_populates="clan", sa_relationship_kwargs={'lazy': 'selectin'})
 
 
 # Models for player profile
@@ -50,11 +53,14 @@ class PlayerProfile(SQLModel, table=True):
 	country: str = Field(description='Player country')
 	language: str = Field(description='App language used by player')
 	birthdate: datetime = Field(description='Player birthdate')
-	gender: Optional[str] = Field(default=None, description='Player gender')
+	gender: str = Field(description='Player gender')
 	clan_id: int = Field(description='Player clan id', foreign_key='clan.id')
 	custom_field: Optional[str] = Field(
 		default=None, description='Custom field for player profile'
 	)
+	inventory: "Inventory" = Relationship(back_populates="player", sa_relationship_kwargs={'lazy': 'selectin'})
+	device: "Device" = Relationship(back_populates="player", sa_relationship_kwargs={'lazy': 'selectin'})
+	clan: "Clan" = Relationship(back_populates="players", sa_relationship_kwargs={'lazy': 'selectin'})
 
 
 # Usually, Inventory would be a separate table containing with all the possible items and the number of each item
@@ -83,6 +89,8 @@ class Inventory(SQLModel, table=True):
 		description='Number of item 100 in player inventory'
 	)
 
+	player: PlayerProfile = Relationship(back_populates="inventory", sa_relationship_kwargs={'lazy': 'selectin'})
+
 
 class Device(SQLModel, table=True):
 	id: int = Field(description='Device ID', primary_key=True)
@@ -93,3 +101,6 @@ class Device(SQLModel, table=True):
 	model: str = Field(description='Device model')
 	carrier: str = Field(description='Carrier name')
 	firmware: str = Field(description='Device firmware version')
+
+	player: PlayerProfile = Relationship(back_populates="device", sa_relationship_kwargs={'lazy': 'selectin'})
+

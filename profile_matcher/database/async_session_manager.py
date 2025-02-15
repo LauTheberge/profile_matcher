@@ -2,6 +2,7 @@ import contextlib
 from logging import Logger
 from typing import AsyncIterator
 
+from dotenv import dotenv_values
 from sqlalchemy.ext.asyncio import (
 	create_async_engine,
 	AsyncConnection,
@@ -11,6 +12,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+config = dotenv_values('.env')
+postgres_url = config['DATABASE_URL']
 
 class AsyncSessionManager:
 	def __init__(self, postgres_url: str):
@@ -88,3 +91,10 @@ class AsyncSessionManager:
 		"""
 		async with self.__engine.begin() as conn:
 			await conn.run_sync(SQLModel.metadata.create_all)
+
+# Create the session manager
+session_manager = AsyncSessionManager(postgres_url)
+
+async def get_db_session():
+	async with session_manager.session() as session:
+		yield session

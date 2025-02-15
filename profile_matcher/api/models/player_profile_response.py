@@ -37,14 +37,15 @@ class PlayerProfileResponse(BaseModel):
     total_refund: float
     total_transactions: int
     last_purchase: Optional[datetime]
-    active_campaigns: List[str]
+    active_campaigns: list[str]
+    devices: list[Device]
     level: int
     xp: int
     total_playtime: int
     country: str
     language: str
     birthdate: datetime
-    gender: Optional[str]
+    gender: str
     inventory: Inventory
     clan: Clan
     custom_field: str

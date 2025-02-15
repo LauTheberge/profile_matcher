@@ -4,7 +4,7 @@ from logging import Logger
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from profile_matcher.core.database.models import Device, Inventory, PlayerProfile, Clan
+from profile_matcher.database.models import Device, Inventory, PlayerProfile, Clan
 
 # This is for the test purpose (in order to seed the database with the test data)
 # In a normal scenario, this data would be coming from the client application.

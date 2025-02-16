@@ -3,10 +3,12 @@ This is a simple project that uses the Ruff formatter and linter.
 Run poetry install to install the dependencies from the .venv file
 
 Set postgres:
-You must hve postgres 16 installed.
+You must have postgres 16 installed.
+https://www.postgresql.org/download/
+
 Add the lib and bin path of postgres to the PATH environment variable.
 
-postgres 16 comes with pgAdmin 4, which is a GUI for postgres, it is the easiest way to create the database.
+postgres 16 comes with pgAdmin 4, which is a GUI for postgres, it is an easy way to create the database.
 Create a server in pgAdmin 4, with these information : 
 
 ```
@@ -17,13 +19,17 @@ password = "1234", - note this is only for the test purpose (usually, would be s
 port = 5432
 ```
 
-create a database in the server with the name `TestDatabase`
+create a database in the postgres server(under TechTest) with the name `TestDatabase`
 
-Plugins: 
-- Ruff
-- .env file support
+At the root of the project, run poetry install
 
+You need to create a .env file at the root of the project, based on the env.example.
+
+Run the project with
 Run: fastapi dev main.py
 
+The project will create the necessary tables and the required data at start up
+
+To test the service, you can either use the 
 
 

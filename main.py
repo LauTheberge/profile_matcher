@@ -3,22 +3,25 @@ from logging import Logger
 
 import asyncpg
 import uvicorn
+from dotenv import dotenv_values
 from fastapi import FastAPI
 
 from profile_matcher.api import client_config_router
 from profile_matcher.data_creator import InitialDataCreator
 from profile_matcher.database import session_manager
 
+config = dotenv_values('.env')
+
 logger = Logger(__name__)
 
 
 async def connect_to_db():
     return await asyncpg.connect(
-        database='TestDatabase',
-        user='postgres',
-        host='127.0.0.1',
-        password='1234',
-        port=5432,
+        database=config['DATABASE_NAME'],
+        user=config['DATABASE_USER'],
+        host=config['DATABASE_HOST'],
+        password=config['DATABASE_PASSWORD'],
+        port=config['DATABASE_PORT'],
     )
 
 
@@ -34,8 +37,7 @@ async def lifespan(app: FastAPI):
         await data_creator.try_create_data(db_session)
         yield
         if session_manager.get_engine is not None:
-            # Close the DB connection and clean up
-            await session_manager.drop_all()
+            # Close the DB connection
             await session_manager.close()
             await connection.close()
 
@@ -44,4 +46,4 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(client_config_router, tags=['client'])
 
 if __name__ == '__main__':
-    uvicorn.run('main:app', host='0.0.0.0', log_level='debug', reload=True)
+    uvicorn.run(app, host='0.0.0.0', port=int(config['APP_PORT']), log_level='debug')

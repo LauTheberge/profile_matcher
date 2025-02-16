@@ -72,14 +72,6 @@ class AsyncSessionManager:
         finally:
             await session.close()
 
-    async def drop_all(self):
-        """
-        For the purpose of testing, we can drop all tables in the database when the test is done in order to keep the
-        database clean.
-        """
-        async with self.__engine.begin() as conn:
-            await conn.run_sync(SQLModel.metadata.drop_all)
-
     async def get_engine(self) -> AsyncIterator[AsyncEngine]:
         """
         Return the engine

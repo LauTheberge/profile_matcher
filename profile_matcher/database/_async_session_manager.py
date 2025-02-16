@@ -1,8 +1,9 @@
 import contextlib
+import os
 from logging import Logger
 from typing import AsyncIterator
 
-from dotenv import dotenv_values
+from dotenv import dotenv_values, load_dotenv
 import asyncpg
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -13,8 +14,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-CONFIG = dotenv_values('.env')
-POSTGRES_URL = CONFIG['DATABASE_URL']
+load_dotenv()  # This will load the .env variables
+POSTGRES_URL = os.getenv('DATABASE_URL')
 
 
 

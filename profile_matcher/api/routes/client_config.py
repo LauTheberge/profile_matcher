@@ -58,12 +58,12 @@ async def get_client_config(
     # Commit to avoid idle in transaction before (mocked) external call
     await session.commit()
 
-    active_sessions = mock_campaign_api()
+    active_sessions: list[ActiveCampaign] = mock_campaign_api()
 
     return player
 
 
-def mock_campaign_api() -> ActiveCampaign:
+def mock_campaign_api() -> list[ActiveCampaign]:
     """
     This mock an external api call to get all the active campaigns
     """
@@ -83,4 +83,4 @@ def mock_campaign_api() -> ActiveCampaign:
         enabled=True,
         last_updated=datetime(2021, 7, 13),
     )
-    return campaign
+    return [campaign]

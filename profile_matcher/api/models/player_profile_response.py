@@ -27,6 +27,7 @@ class Device(BaseModel):
     carrier: str
     firmware: str
 
+
 class PlayerProfileResponse(BaseModel):
     player_id: str
     credential: str
@@ -49,4 +50,3 @@ class PlayerProfileResponse(BaseModel):
     inventory: Inventory
     clan: Clan
     custom_field: str
-

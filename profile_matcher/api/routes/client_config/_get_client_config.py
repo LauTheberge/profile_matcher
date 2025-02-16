@@ -1,5 +1,6 @@
+import logging
+import pathlib
 from datetime import datetime
-from logging import Logger
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
@@ -16,7 +17,10 @@ from profile_matcher.api.models.player_profile_response import PlayerProfileResp
 from profile_matcher.database import get_db_session
 from profile_matcher.database.models import PlayerProfile, Inventory
 
+
 router = APIRouter()
+
+logger = logging.getLogger('uvicorn')
 
 
 # This would usually be in a separate file with the first path of the route for all routes in the folder (for example,
@@ -38,8 +42,6 @@ router = APIRouter()
 #
 # This is kept in the same file for simplicity, since we only have one route in this project, and the path of the
 # route is straightforward.
-
-logger = Logger('Get_client_config')
 
 
 @router.get(

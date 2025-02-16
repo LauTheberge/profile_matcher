@@ -82,10 +82,8 @@ class InitialDataCreator:
         This is to prevent the program from trying to create the same data multiple times.
         """
         self.logger.info('Trying to create data')
-        statement_player = select(PlayerProfile)
-        statement_clan = select(Clan)
-        result_player = await session.exec(statement_player)
-        result_clan = await session.exec(statement_clan)
-        if not result_player.first() and not result_clan.first():
+        statement = select(PlayerProfile)
+        player = await session.exec(statement)
+        if not player.first():
             self.logger.debug('Data does not exist. Creating data')
             await self.create_data(session)

@@ -3,6 +3,7 @@ from logging import Logger
 from typing import AsyncIterator
 
 from dotenv import dotenv_values
+import asyncpg
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncConnection,
@@ -12,19 +13,40 @@ from sqlalchemy.ext.asyncio import (
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-config = dotenv_values('.env')
-postgres_url = config['DATABASE_URL']
+CONFIG = dotenv_values('.env')
+POSTGRES_URL = CONFIG['DATABASE_URL']
+
 
 
 class AsyncSessionManager:
-    def __init__(self, postgres_url: str):
-        self.__engine = create_async_engine(postgres_url)
+    def __init__(self):
+        self.__engine = create_async_engine(POSTGRES_URL)
         # We could also have two session makers, one for read and one for write. read_session_maker would
         # have autocommit=True
         self.__session_maker = async_sessionmaker(
             autocommit=False, bind=self.__engine, class_=AsyncSession
         )
         self.__loger = Logger('AsyncSessionManager')
+
+    async def create_database_if_not_exists(self):
+        """
+        Ensure the database exists before creating tables.
+        """
+        parsed_url = self.__engine.url
+        db_name = parsed_url.database
+
+        # Convert SQLAlchemy-style DSN to asyncpg-compatible DSN
+        asyncpg_url = f"postgres://{parsed_url.username}:{parsed_url.password}@{parsed_url.host}:{parsed_url.port}/postgres"
+
+        conn = await asyncpg.connect(asyncpg_url)
+        try:
+            db_exists = await conn.fetchval(
+                'SELECT 1 FROM pg_database WHERE datname=$1', db_name
+            )
+            if not db_exists:
+                await conn.execute(f'CREATE DATABASE "{db_name}"')
+        finally:
+            await conn.close()  # Manually close the connection
 
     async def close(self):
         """
@@ -87,7 +109,7 @@ class AsyncSessionManager:
 
 
 # Create the session manager
-session_manager = AsyncSessionManager(postgres_url)
+session_manager = AsyncSessionManager()
 
 
 async def get_db_session():

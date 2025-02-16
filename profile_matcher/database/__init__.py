@@ -1,4 +1,4 @@
-from profile_matcher.database.async_session_manager import (
+from profile_matcher.database._async_session_manager import (
     AsyncSessionManager,
     session_manager,
     get_db_session,

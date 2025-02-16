@@ -1,4 +1,5 @@
-import logging
+import logging.config
+import pathlib
 from contextlib import asynccontextmanager
 
 import asyncpg
@@ -12,8 +13,7 @@ from profile_matcher.database import session_manager
 
 config = dotenv_values('.env')
 
-logger = logging.getLogger('uvicorn.access')
-logger.addHandler(logging.StreamHandler())
+postgres_url = config['DATABASE_URL']
 
 
 async def connect_to_db():
@@ -32,6 +32,7 @@ async def connect_to_db():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with session_manager.session() as db_session:
+        await session_manager.create_database_if_not_exists()
         connection = await connect_to_db()
         await session_manager.create_all()
         data_creator = InitialDataCreator()
@@ -46,5 +47,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(client_config_router, tags=['client'])
 
+log_config = str(pathlib.Path('log.ini').resolve())
+logging.config.fileConfig(log_config, disable_existing_loggers=False)
+
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=int(config['APP_PORT']), log_level='debug')
+    uvicorn.run(
+        app,
+        host='0.0.0.0',
+        port=int(config['APP_PORT']),
+        log_level='debug',
+        log_config=log_config,
+    )

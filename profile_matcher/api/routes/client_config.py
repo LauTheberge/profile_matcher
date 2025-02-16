@@ -73,14 +73,15 @@ async def get_client_config(
     )
 
     for active_campaign in active_campaigns:
-        # We first check if the campaign is already present
-        if active_campaign.name in player.active_campaigns:
-            continue
+        # If the match is already present in the list and still a match, it stays there, if it was present and is no
+        # longer a match, it is removed. If it's valid and was not previously in the list, it is added.
+        is_a_match = validate_player_and_campaign_match(player, active_campaign)
+        campaign_name = active_campaign.name
 
-        # We check which campaigns match the player profile
-        is_a_match = validate_player_and_campaign(player, active_campaign)
-        if is_a_match:
-            player.active_campaigns.append(active_campaign.name)
+        if is_a_match and campaign_name not in player.active_campaigns:
+            player.active_campaigns.append(campaign_name)
+        elif not is_a_match and campaign_name in player.active_campaigns:
+            player.active_campaigns.remove(campaign_name)
 
     # Update the database with the new player info
     try:
@@ -89,8 +90,9 @@ async def get_client_config(
         await session.refresh(player)
     except Exception as e:
         logger.error(f'Error in committing active campaign to database: {e}')
-        raise InternalServerError('Something went wrong. Please try again later or contact support if the problem persists.')
-
+        raise InternalServerError(
+            'Something went wrong. Please try again later or contact support if the problem persists.'
+        )
 
     return player
 
@@ -112,7 +114,7 @@ def remove_inactive_campaigns(
     ]
 
 
-def validate_player_and_campaign(
+def validate_player_and_campaign_match(
     player: PlayerProfileResponse, campaign: ActiveCampaign
 ) -> bool:
     """

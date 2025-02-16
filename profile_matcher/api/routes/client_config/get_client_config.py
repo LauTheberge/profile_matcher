@@ -1,10 +1,9 @@
 from datetime import datetime
 from logging import Logger
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from werkzeug.exceptions import NotFound, InternalServerError
 
 from profile_matcher.api.models.campaign import (
     ActiveCampaign,
@@ -12,6 +11,7 @@ from profile_matcher.api.models.campaign import (
     Level,
     MatcherContent,
 )
+from profile_matcher.api.models.error_response import ErrorResponse
 from profile_matcher.api.models.player_profile_response import PlayerProfileResponse
 from profile_matcher.database import get_db_session
 from profile_matcher.database.models import PlayerProfile, Inventory
@@ -46,6 +46,10 @@ logger = Logger('Get_client_config')
     '/get_client_config/{player_id}',
     response_model=PlayerProfileResponse,
     response_model_exclude_none=True,
+    responses={
+        404: {'model': ErrorResponse, 'description': 'Player not found'},
+        500: {'model': ErrorResponse, 'description': 'Internal server error'},
+    },
 )
 async def get_client_config(
     player_id: str, session: AsyncSession = Depends(get_db_session)
@@ -58,7 +62,9 @@ async def get_client_config(
     player = result.first()
     if player is None:
         logger.debug(f'No player found with id {player_id}')
-        raise NotFound('No player found')
+        raise HTTPException(
+            status_code=404, detail=f'No player found with id {player_id}'
+        )
 
     # Commit to avoid idle in transaction before (mocked) external call
     await session.commit()
@@ -90,8 +96,9 @@ async def get_client_config(
         await session.refresh(player)
     except Exception as e:
         logger.error(f'Error in committing active campaign to database: {e}')
-        raise InternalServerError(
-            'Something went wrong. Please try again later or contact support if the problem persists.'
+        raise HTTPException(
+            status_code=500,
+            detail='Something went wrong while getting the client config.',
         )
 
     return player

@@ -9,7 +9,7 @@ https://www.postgresql.org/download/
 Add the lib and bin path of postgres to the PATH environment variable.
 
 postgres 16 comes with pgAdmin 4, which is a GUI for postgres, it is an easy way to create the database.
-Create a server in pgAdmin 4, with these information : 
+Create a server in pgAdmin 4, with these information :
 
 ```
 Name = "TechTest",
@@ -30,6 +30,7 @@ Run: fastapi dev main.py
 
 The project will create the necessary tables and the required data at start up
 
-To test the service, you can either use the 
+To test the service, you can either use the swagger to test the route at http://127.0.0.1:8000/docs (or the port used)
+or a use an api platform like postman to call GET `127.0.0.1:8000/get_client_config/:id`
 
 

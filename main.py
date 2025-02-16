@@ -1,5 +1,5 @@
+import logging
 from contextlib import asynccontextmanager
-from logging import Logger
 
 import asyncpg
 import uvicorn
@@ -12,7 +12,8 @@ from profile_matcher.database import session_manager
 
 config = dotenv_values('.env')
 
-logger = Logger(__name__)
+logger = logging.getLogger('uvicorn.access')
+logger.addHandler(logging.StreamHandler())
 
 
 async def connect_to_db():

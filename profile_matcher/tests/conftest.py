@@ -61,14 +61,14 @@ async def async_session() -> AsyncIterator[AsyncSession]:
 
 @pytest_asyncio.fixture(scope='session')
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url='http://testserver'
+    ) as client:
         yield client
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+
+@pytest_asyncio.fixture(scope='session', autouse=True)
 async def override_get_db_session(async_session):
-    """
-    Override FastAPI's get_db_session dependency to use the test session.
-    """
     async def _get_test_db_session():
         yield async_session
 
@@ -76,12 +76,16 @@ async def override_get_db_session(async_session):
     yield
     app.dependency_overrides.clear()
 
+    await ENGINE.dispose()
+
 
 async def create_database_if_not_exists(database_url: URL, db_name: str):
     """Create the database if it does not exist."""
     asyncpg_url = f'postgres://{database_url.username}:{database_url.password}@{database_url.host}:{database_url.port}/postgres'
-    conn = await asyncpg.connect(asyncpg_url)
+    conn = None
     try:
+        conn = await asyncpg.connect(asyncpg_url)
+
         # Check if the database already exists
         existing_dbs = await conn.fetch('SELECT datname FROM pg_database')
         if db_name not in [db['datname'] for db in existing_dbs]:
@@ -94,7 +98,8 @@ async def create_database_if_not_exists(database_url: URL, db_name: str):
     except Exception as e:
         raise Exception('Failed to create test database: ' + str(e))
     finally:
-        await conn.close()
+        if conn:
+            await conn.close()
 
 
 async def wait_for_db_ready(
@@ -124,31 +129,22 @@ async def create_test_database_and_tables():
     # Ensure the database is ready before trying to create tables
     await wait_for_db_ready(parsed_url, db_name)
 
-    # Reconnect and create tables after confirming the database is ready
-    asyncpg_url = f'postgres://{parsed_url.username}:{parsed_url.password}@{parsed_url.host}:{parsed_url.port}/{db_name}'
-    conn = await asyncpg.connect(asyncpg_url)
-    try:
-        async with ENGINE.begin() as conn:
-            await conn.run_sync(SQLModel.metadata.create_all)
-    except Exception as e:
-        raise Exception('Failed to create tables: ' + str(e))
-    finally:
-        await conn.close()
+    async with ENGINE.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
 
     yield ENGINE
 
-    # To drop the database, connect to the default "postgres" database first
+    # Cleanup Phase: Terminate connections and drop the database
+    await ENGINE.dispose()
+
     asyncpg_url = f'postgres://{parsed_url.username}:{parsed_url.password}@{parsed_url.host}:{parsed_url.port}/postgres'
     conn = await asyncpg.connect(asyncpg_url)
     try:
-        # Terminate active connections to the test database before dropping it
         await conn.execute(f"""
             SELECT pg_terminate_backend(pid)
             FROM pg_stat_activity
             WHERE datname = '{db_name}' AND pid <> pg_backend_pid();
         """)
-
-        # Now drop the database since we've terminated other sessions
         await conn.execute(f'DROP DATABASE IF EXISTS "{db_name}"')
     except Exception as e:
         raise Exception('Failed to drop test database: ' + str(e))

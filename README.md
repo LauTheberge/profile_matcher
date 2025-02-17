@@ -42,6 +42,6 @@ To test the service, you can either use the swagger to test the route at http://
 or a use an api platform like postman to call GET `127.0.0.1:8000/get_client_config/:id`
 
 Note: Despite the small size of the project, the file architecture has been done with the maintenance of a larger 
-project in mind.
+project in mind, this is why some files are more spread or why some folder only contains one file.
 
 

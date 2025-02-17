@@ -69,9 +69,6 @@ class PlayerProfile(SQLModel, table=True):
     )
 
 
-# Usually, Inventory would be a separate table containing with all the possible items and the number of each item
-# that the player has. For the test purpose, it is kept as a JSONB field in the PlayerProfile table
-# a one-to-one relations
 class Inventory(SQLModel, table=True):
     id: int = Field(
         default=None, description='Inventory ID linked to a player', primary_key=True

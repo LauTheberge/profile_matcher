@@ -6,42 +6,20 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from profile_matcher.api.models.campaign import (
+from profile_matcher.database import get_db_session
+from profile_matcher.database.models import PlayerProfile, Inventory
+from ...models import (
     ActiveCampaign,
     Matcher,
     Level,
     MatcherContent,
+    ErrorResponse,
+    PlayerProfileResponse,
 )
-from profile_matcher.api.models.error_response import ErrorResponse
-from profile_matcher.api.models.player_profile_response import PlayerProfileResponse
-from profile_matcher.database import get_db_session
-from profile_matcher.database.models import PlayerProfile, Inventory
-
 
 router = APIRouter()
 
 logger = logging.getLogger('uvicorn')
-
-
-# This would usually be in a separate file with the first path of the route for all routes in the folder (for example,
-# if we had more routes) with a separate router at the base path. for profile_matcher.
-# | - route
-# |     |---- client
-# |             |------- get.py
-# |             |------- post.py
-# |             |------- put.py
-#               ...
-# |             |------- router.py
-# |    |----- match
-# |             |------- get.py
-# |             |------- post.py
-# |             |------- put.py
-#               ...
-# |             |------- router.py
-# |    |----- router.py
-#
-# This is kept in the same file for simplicity, since we only have one route in this project, and the path of the
-# route is straightforward.
 
 
 @router.get(

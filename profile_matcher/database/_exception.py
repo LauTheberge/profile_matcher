@@ -1,0 +1,2 @@
+class AsyncSessionManagerException(Exception):
+    pass

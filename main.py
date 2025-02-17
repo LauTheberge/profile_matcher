@@ -5,16 +5,16 @@ from contextlib import asynccontextmanager
 
 import asyncpg
 import uvicorn
-from dotenv import dotenv_values, load_dotenv
+from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from profile_matcher.api import client_config_router
-from profile_matcher.data_creator import InitialDataCreator
 from profile_matcher.database import session_manager
-
+from profile_matcher.database.data_creator import InitialDataCreator
 
 load_dotenv()
 POSTGRES_URL = os.getenv('DATABASE_URL')
+
 
 async def connect_to_db():
     return await asyncpg.connect(
@@ -26,9 +26,11 @@ async def connect_to_db():
     )
 
 
-# For purpose of this test, create a lifespan event that will
-# create the database and tables when the app starts and clear the metadata when the app stops.
-# In a normal scenario, table would be created from a migration script using Alembic.
+# For purpose of this test, create a lifespan event that will create the database, tables and test data when
+# the app starts. In a normal scenario, the database would be created prior to the project and the tables would
+# be created via Alembic (or another migration tool).
+# Any data that would need to be added for the service to work would be added either by a task running once or by a
+# seed.
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with session_manager.session() as db_session:

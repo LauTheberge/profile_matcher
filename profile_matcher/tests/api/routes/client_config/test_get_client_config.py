@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from profile_matcher.api.models.campaign import (
+from profile_matcher.api.models._campaign import (
     Matcher,
     Level,
     MatcherContent,
@@ -21,6 +21,7 @@ class TestGetClientConfig:
         # For the setup, this can either be done in every test (in order to keep them separate from each other) or
         # in the setup to reduce repetition. Here, since the player data doesn't change from one test to the other,
         # and there is a lot of data and repetition, it has been put in setup_data.
+        # Note: we do not reuse the datacreator, as it is not something that would usually be in the project.
         self.__test_clan = Clan(
             id=123456,
             name='Hello world clan',

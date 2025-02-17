@@ -3,8 +3,8 @@ import os
 from logging import Logger
 from typing import AsyncIterator
 
-from dotenv import dotenv_values, load_dotenv
 import asyncpg
+from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncConnection,
@@ -14,9 +14,10 @@ from sqlalchemy.ext.asyncio import (
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from ._exception import AsyncSessionManagerException
+
 load_dotenv()  # This will load the .env variables
 POSTGRES_URL = os.getenv('DATABASE_URL')
-
 
 
 class AsyncSessionManager:
@@ -37,7 +38,7 @@ class AsyncSessionManager:
         db_name = parsed_url.database
 
         # Convert SQLAlchemy-style DSN to asyncpg-compatible DSN
-        asyncpg_url = f"postgres://{parsed_url.username}:{parsed_url.password}@{parsed_url.host}:{parsed_url.port}/postgres"
+        asyncpg_url = f'postgres://{parsed_url.username}:{parsed_url.password}@{parsed_url.host}:{parsed_url.port}/postgres'
 
         conn = await asyncpg.connect(asyncpg_url)
         try:
@@ -52,10 +53,12 @@ class AsyncSessionManager:
     async def close(self):
         """
         Close the database connection
-        :raises Exception: If the connection is not initialized
+        :raises AsyncSessionManagerException: If the connection is not initialized
         """
         if self.__engine is None:
-            raise Exception('DatabaseSessionManager is not initialized')
+            raise AsyncSessionManagerException(
+                'DatabaseSessionManager is not initialized'
+            )
         await self.__engine.dispose()
 
         self.__engine = None
@@ -64,15 +67,17 @@ class AsyncSessionManager:
     @contextlib.asynccontextmanager
     async def connect(self) -> AsyncIterator[AsyncConnection]:
         """
-        :raises Exception: If the connection is not initialized
+        :raises AsyncSessionManagerException: If the connection is not initialized or there is an error in the connection
         """
         if self.__engine is None:
-            raise Exception('DatabaseSessionManager is not initialized')
+            raise AsyncSessionManagerException(
+                'DatabaseSessionManager is not initialized'
+            )
 
         async with self.__engine.begin() as connection:
             try:
                 yield connection
-            except Exception as e:
+            except AsyncSessionManagerException as e:
                 await connection.rollback()
                 self.__loger.error(f'Error in connection: {e}')
                 raise e
@@ -80,15 +85,17 @@ class AsyncSessionManager:
     @contextlib.asynccontextmanager
     async def session(self) -> AsyncIterator[AsyncSession]:
         """ "
-        :raises Exception: If the session maker is not initialized
+        :raises AsyncSessionManagerException: If the session maker is not initialized or there is an error in the session
         """
         if self.__session_maker is None:
-            raise Exception('DatabaseSessionManager is not initialized')
+            raise AsyncSessionManagerException(
+                'DatabaseSessionManager is not initialized'
+            )
 
         session = self.__session_maker()
         try:
             yield session
-        except Exception as e:
+        except AsyncSessionManagerException as e:
             await session.rollback()
             self.__loger.error(f'Error in session: {e}')
             raise e

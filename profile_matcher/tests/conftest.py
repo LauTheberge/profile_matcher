@@ -43,7 +43,7 @@ def event_loop():
     return asyncio.get_event_loop()
 
 
-@pytest_asyncio.fixture(scope='session')
+@pytest_asyncio.fixture(scope='function')
 async def async_session() -> AsyncIterator[AsyncSession]:
     session = async_sessionmaker(ENGINE, class_=AsyncSession, expire_on_commit=False)
 
@@ -59,7 +59,7 @@ async def async_session() -> AsyncIterator[AsyncSession]:
     await ENGINE.dispose()
 
 
-@pytest_asyncio.fixture(scope='session')
+@pytest_asyncio.fixture(scope='function')
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url='http://testserver'
@@ -67,7 +67,7 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
         yield client
 
 
-@pytest_asyncio.fixture(scope='session', autouse=True)
+@pytest_asyncio.fixture(scope='function', autouse=True)
 async def override_get_db_session(async_session):
     async def _get_test_db_session():
         yield async_session

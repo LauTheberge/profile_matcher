@@ -1,8 +1,8 @@
 import logging
-import pathlib
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -69,9 +69,19 @@ async def get_client_config(
         )
 
     # Commit to avoid idle in transaction before (mocked) external call
+
     await session.commit()
 
-    active_campaigns: list[ActiveCampaign] = __mock_campaign_api()
+    try:
+        active_campaigns: list[ActiveCampaign] = __mock_campaign_api()
+    # Here, we would except the specific exception that can be raised from the service. Since we do not raise a specific
+    # exception, we use "Exception"
+    except Exception as e:
+        logger.error(f'Error in getting active campaigns: {e}')
+        raise HTTPException(
+            status_code=500,
+            detail='Something went wrong while getting the client config.',
+        )
 
     # Refresh the database to recuperate the player
     await session.refresh(player)
@@ -96,7 +106,7 @@ async def get_client_config(
         session.add(player)
         await session.commit()
         await session.refresh(player)
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f'Error in committing active campaign to database: {e}')
         raise HTTPException(
             status_code=500,
@@ -154,7 +164,7 @@ def __parse_items(inventory: Inventory) -> list[str]:
 
 def __mock_campaign_api() -> list[ActiveCampaign]:
     """
-    This mock an external api call to get all the active campaigns
+    This mock the external api call to get all the active campaigns
     """
     campaign_level = Level(min=1, max=3)
     has_content = MatcherContent(country=['US', 'RO', 'CA'], items=['item_1'])

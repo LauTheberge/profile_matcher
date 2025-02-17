@@ -41,6 +41,7 @@ The project will create the necessary database, necessary tables and the require
 To test the service, you can either use the swagger to test the route at http://127.0.0.1:8000/docs (or the port used)
 or a use an api platform like postman to call GET `127.0.0.1:8000/get_client_config/:id`
 
-
+Note: Despite the small size of the project, the file architecture has been done with the maintenance of a larger 
+project in mind.
 
 

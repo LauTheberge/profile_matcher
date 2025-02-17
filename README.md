@@ -5,13 +5,17 @@ You need python 3 (done with python 3.13) and Postgres 16
 Make sure you have python 3
 https://www.python.org/downloads/
 
-Set postgres:
 You must have postgres 16 installed.
 https://www.postgresql.org/download/
-
 Add the lib and bin path of postgres to the PATH environment variable.
-
 For the database, the default server (PostgreSQL 16) was used to store the database.
+
+You must also have poetry installed, which requires pipx.
+https://pipx.pypa.io/stable/installation/
+When prompt, run the command to add the necessary environment variable path (it should appear in the terminal)
+
+`pipx install poetry`
+Restart your computer/environment
 
 At the root of this project, run poetry install
 

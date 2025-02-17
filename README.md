@@ -12,12 +12,21 @@ For the database, the default server (PostgreSQL 16) was used to store the datab
 
 You must also have poetry installed, which requires pipx.
 https://pipx.pypa.io/stable/installation/
-When prompt, run the command to add the necessary environment variable path (it should appear in the terminal)
-
-`pipx install poetry`
+For example under windows:
+python -m pip install --user pipx
+python -m pipx ensurepath
 Restart your computer/environment
 
-At the root of this project, run poetry install
+`pipx install poetry`
+
+At the root of this project open a terminal,
+create a venv :  
+`python -m venv .venv`
+navigate to the venv and activate it 
+`.venv\Scripts\Activate.ps1`
+(you might need the terminal to be admin and, under windows, run `Set-ExecutionPolicy RemoteSigned`, run
+`Set-ExecutionPolicy Restricted` when done)
+run poetry install in the venv
 
 You need to create a .env file at the root of the project, based on the env.example.
 

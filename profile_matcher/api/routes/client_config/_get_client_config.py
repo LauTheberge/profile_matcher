@@ -71,19 +71,19 @@ async def get_client_config(
     # Commit to avoid idle in transaction before (mocked) external call
     await session.commit()
 
-    active_campaigns: list[ActiveCampaign] = mock_campaign_api()
+    active_campaigns: list[ActiveCampaign] = __mock_campaign_api()
 
     # Refresh the database to recuperate the player
     await session.refresh(player)
 
-    player.active_campaigns = remove_inactive_campaigns(
+    player.active_campaigns = __remove_inactive_campaigns(
         player.active_campaigns, active_campaigns
     )
 
     for active_campaign in active_campaigns:
         # If the match is already present in the list and still a match, it stays there, if it was present and is no
         # longer a match, it is removed. If it's valid and was not previously in the list, it is added.
-        is_a_match = validate_player_and_campaign_match(player, active_campaign)
+        is_a_match = __validate_player_and_campaign_match(player, active_campaign)
         campaign_name = active_campaign.name
 
         if is_a_match and campaign_name not in player.active_campaigns:
@@ -106,7 +106,7 @@ async def get_client_config(
     return player
 
 
-def remove_inactive_campaigns(
+def __remove_inactive_campaigns(
     player_campaign_list: list[str], active_campaigns: list[ActiveCampaign]
 ) -> list[str]:
     """
@@ -123,7 +123,7 @@ def remove_inactive_campaigns(
     ]
 
 
-def validate_player_and_campaign_match(
+def __validate_player_and_campaign_match(
     player: PlayerProfileResponse, campaign: ActiveCampaign
 ) -> bool:
     """
@@ -132,7 +132,7 @@ def validate_player_and_campaign_match(
     campaign.
     """
     logger.debug(f'Validating player {player} with campaign {campaign}')
-    player_items = parse_items(player.inventory)
+    player_items = __parse_items(player.inventory)
 
     return (
         (
@@ -143,7 +143,7 @@ def validate_player_and_campaign_match(
     ) and (not set(player_items).intersection(campaign.matchers.does_not_have.items))
 
 
-def parse_items(inventory: Inventory) -> list[str]:
+def __parse_items(inventory: Inventory) -> list[str]:
     """
     Parse the items from the inventory that are not None into a list of strings. Only the name (first element of the
     tuple) is needed.
@@ -152,7 +152,7 @@ def parse_items(inventory: Inventory) -> list[str]:
     return [key for key, value in inventory.model_dump().items() if value is not None]
 
 
-def mock_campaign_api() -> list[ActiveCampaign]:
+def __mock_campaign_api() -> list[ActiveCampaign]:
     """
     This mock an external api call to get all the active campaigns
     """

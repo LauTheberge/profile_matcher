@@ -1,18 +1,20 @@
 import asyncio
 import os
 import random
-from typing import AsyncIterator
+from typing import AsyncIterator, AsyncGenerator
 
 import asyncpg
 import pytest
 import pytest_asyncio
-from async_asgi_testclient import TestClient
 from asyncpg import DuplicateDatabaseError
 from dotenv import load_dotenv
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
+
+from profile_matcher.database import get_db_session
 
 load_dotenv()
 
@@ -58,9 +60,21 @@ async def async_session() -> AsyncIterator[AsyncSession]:
 
 
 @pytest_asyncio.fixture(scope='session')
-async def async_client():
-    client = TestClient(app)
-    yield client
+async def async_client() -> AsyncGenerator[AsyncClient, None]:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        yield client
+
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def override_get_db_session(async_session):
+    """
+    Override FastAPI's get_db_session dependency to use the test session.
+    """
+    async def _get_test_db_session():
+        yield async_session
+
+    app.dependency_overrides[get_db_session] = _get_test_db_session
+    yield
+    app.dependency_overrides.clear()
 
 
 async def create_database_if_not_exists(database_url: URL, db_name: str):

@@ -3,8 +3,6 @@ from typing import Optional, List
 
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.orm import relationship
-
 from sqlmodel import SQLModel, Field, Relationship
 
 

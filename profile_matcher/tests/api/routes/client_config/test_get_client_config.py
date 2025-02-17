@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from profile_matcher.api.models._campaign import (
+from profile_matcher.api.models import (
     Matcher,
     Level,
     MatcherContent,
@@ -100,7 +100,7 @@ class TestGetClientConfig:
         )
 
         with patch(
-            'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+            'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
             new_callable=Mock,
         ) as mock_campaign_api:
             mock_campaign_api.return_value = [mock_campaign]
@@ -139,7 +139,7 @@ class TestGetClientConfig:
         )
 
         with patch(
-            'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+            'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
             new_callable=Mock,
         ) as mock_campaign_api:
             mock_campaign_api.return_value = []
@@ -236,7 +236,7 @@ class TestGetClientConfig:
         )
 
         with patch(
-            'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+            'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
             new_callable=Mock,
         ) as mock_campaign_api:
             mock_campaign_api.return_value = [
@@ -295,7 +295,7 @@ class TestGetClientConfig:
         )
 
         with patch(
-            'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+            'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
             new_callable=Mock,
         ) as mock_campaign_api:
             mock_campaign_api.return_value = [mock_campaign]
@@ -377,7 +377,7 @@ class TestGetClientConfig:
         )
 
         with patch(
-            'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+            'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
             new_callable=Mock,
         ) as mock_campaign_api:
             mock_campaign_api.return_value = [
@@ -432,7 +432,7 @@ class TestGetClientConfig:
         )
 
         with patch(
-            'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+            'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
             new_callable=Mock,
         ) as mock_campaign_api:
             mock_campaign_api.return_value = []
@@ -496,7 +496,7 @@ class TestGetClientConfig:
         )
 
         with patch(
-            'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+            'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
             side_effect=Exception,
         ):
             # Act
@@ -542,7 +542,7 @@ class TestGetClientConfig:
             new=AsyncMock(side_effect=[None, SQLAlchemyError('Database error')]),
         ):
             with patch(
-                'profile_matcher.api.routes.client_config._get.__mock_campaign_api',
+                'profile_matcher.api.routes._client_config._get.__mock_campaign_api',
                 new_callable=Mock,
             ) as mock_campaign_api:
                 mock_campaign_api.return_value = [mock_campaign]

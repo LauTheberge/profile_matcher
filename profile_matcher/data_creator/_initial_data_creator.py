@@ -1,10 +1,11 @@
 from datetime import datetime
-from logging import Logger
+from logging import getLogger
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from profile_matcher.database.models import Device, Inventory, PlayerProfile, Clan
+
 
 # This is for the test purpose (in order to seed the database with the test data)
 # In a normal scenario, this data would be coming from the client application.
@@ -12,7 +13,7 @@ from profile_matcher.database.models import Device, Inventory, PlayerProfile, Cl
 
 class InitialDataCreator:
     def __init__(self):
-        self.logger = Logger(__name__)
+        self.logger = getLogger('uvicorn')
 
     async def create_data(self, session: AsyncSession):
         """
@@ -63,6 +64,7 @@ class InitialDataCreator:
             carrier='vodafone',
             firmware='123',
         )
+
         session.add(test_clan)
         session.add(player_profile)
         # Sync the temporary state with the permanent state before refreshing to make data available for test_inventory
